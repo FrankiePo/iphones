@@ -1,6 +1,6 @@
 <form novalidate [formGroup]="phoneGroupForm">
   <div ngbRadioGroup name="type" formControlName="type">
-    <label class="btn btn-primary" *ngFor="let ptype of pts.getTypes();">
+    <label class="btn btn-primary" *ngFor="let ptype of getTypes()">
       <input type="radio" [value]="ptype.type">{{ ptype.smallName }}
     </label>
   </div>
