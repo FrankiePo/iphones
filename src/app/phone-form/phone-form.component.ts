@@ -21,16 +21,16 @@ export class PhoneFormComponent implements OnInit {
   private chosenType: IType;
   private chosenPhone: IPhone;
   constructor(
-    private fb: FormBuilder,
-    private pts: TypesService,
-    private clr: ColorsService,
-    private sz: SizesService,
-    private st: StatesService,
+    private formBuilder: FormBuilder,
+    private typesService: TypesService,
+    private colorsService: ColorsService,
+    private sizesService: SizesService,
+    private statesService: StatesService,
   ) {}
 
   ngOnInit() {
     this.setNewType(PhoneType.I4S);
-    this.phoneGroupForm = this.fb.group(this.chosenPhone);
+    this.phoneGroupForm = this.formBuilder.group(this.chosenPhone);
     this.phoneGroupForm.valueChanges.subscribe((data: IPhone) => {
       if (this.chosenPhone.type !== data.type) {
         this.setNewType(data.type);
@@ -41,7 +41,7 @@ export class PhoneFormComponent implements OnInit {
     });
   }
   setNewType(newType: PhoneType) {
-    this.chosenType = this.pts.getType(newType);
+    this.chosenType = this.typesService.getType(newType);
     this.chosenPhone = {
       type: this.chosenType.type,
       size: this.chosenType.availableSizes[0],
@@ -50,19 +50,19 @@ export class PhoneFormComponent implements OnInit {
     };
   }
   get types() {
-    return this.pts.getTypes();
+    return this.typesService.getTypes();
   }
   get availableSizes(): ISize[] {
-    return this.chosenType.availableSizes.map(sz => this.sz.getSize(sz));
+    return this.chosenType.availableSizes.map(size => this.sizesService.getSize(size));
   }
   get availableColors(): IColor[] {
-    return this.chosenType.availableColors.map(clr => this.clr.getColor(clr));
+    return this.chosenType.availableColors.map(color => this.colorsService.getColor(color));
   }
   get availableStates(): IState[] {
-    return this.chosenType.availableStates.map(st => this.st.getState(st));
+    return this.chosenType.availableStates.map(state => this.statesService.getState(state));
   }
   get descriptions(): string[] {
     console.log("-- Again Descriptions");
-    return this.st.getState(this.chosenPhone.state).desc;
+    return this.statesService.getState(this.chosenPhone.state).desc;
   }
 }
