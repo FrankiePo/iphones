@@ -49,19 +49,20 @@ export class PhoneFormComponent implements OnInit {
       state: this.chosenType.availableStates[0],
     };
   }
-  getTypes() {
+  get types() {
     return this.pts.getTypes();
   }
-  getAvailableSizes(): ISize[] {
+  get availableSizes(): ISize[] {
     return this.chosenType.availableSizes.map(sz => this.sz.getSize(sz));
   }
-  getAvailableColors(): IColor[] {
+  get availableColors(): IColor[] {
     return this.chosenType.availableColors.map(clr => this.clr.getColor(clr));
   }
-  getAvailableStates(): IState[] {
+  get availableStates(): IState[] {
     return this.chosenType.availableStates.map(st => this.st.getState(st));
   }
-  getDescriptions(): string[] {
+  get descriptions(): string[] {
+    console.log("-- Again Descriptions");
     return this.st.getState(this.chosenPhone.state).desc;
   }
 }

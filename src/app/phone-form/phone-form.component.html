@@ -1,31 +1,31 @@
 <form novalidate [formGroup]="phoneGroupForm">
   <div ngbRadioGroup name="type" formControlName="type">
-    <label class="btn btn-primary" *ngFor="let ptype of getTypes()">
+    <label class="btn btn-primary" *ngFor="let ptype of types">
       <input type="radio" [value]="ptype.type">{{ ptype.smallName }}
     </label>
   </div>
   <hr/>
   <h3>Модификация:</h3>
   <div ngbRadioGroup name="size" formControlName="size">
-    <label class="btn btn-primary" *ngFor="let size of getAvailableSizes()">
+    <label class="btn btn-primary" *ngFor="let size of availableSizes">
       <input type="radio" [value]="size.id">{{ size.name }}
     </label>
   </div>
   <hr/>
   <div ngbRadioGroup name="color" formControlName="color">
-    <label class="btn btn-primary" *ngFor="let color of getAvailableColors()">
+    <label class="btn btn-primary" *ngFor="let color of availableColors">
       <input type="radio" [value]="color.id">{{ color.name }}
     </label>
   </div>
   <hr/>
   <h3>Состояние:</h3>
   <div ngbRadioGroup name="state" formControlName="state">
-    <label class="btn btn-primary" *ngFor="let state of getAvailableStates()">
+    <label class="btn btn-primary" *ngFor="let state of availableStates">
       <input type="radio" [value]="state.id">{{ state.name }}
     </label>
   </div>
   <ul>
-    <li *ngFor="let li of getDescriptions()">{{ li }}</li>
+    <li *ngFor="let li of descriptions">{{ li }}</li>
   </ul>
   <hr/>
   <app-call-form></app-call-form>
