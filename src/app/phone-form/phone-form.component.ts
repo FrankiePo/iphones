@@ -34,6 +34,7 @@ export class PhoneFormComponent implements OnInit {
     this.phoneGroupForm.valueChanges.subscribe((data: IPhone) => {
       if (this.chosenPhone.type !== data.type) {
         this.setNewType(data.type);
+        this.phoneGroupForm.patchValue(this.chosenPhone);
       } else {
         this.chosenPhone = data;
       }
