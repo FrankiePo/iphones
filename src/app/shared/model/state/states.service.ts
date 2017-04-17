@@ -31,10 +31,10 @@ export class StatesService {
       }
     ]
   }
-  getStates(): IState[] {
-    return this.states;
+  getStates(stArr: PhoneState[]): IState[] {
+    return this.states.filter(({ id }) => stArr.indexOf(id) >= 0);
   }
   getState(st: PhoneState): IState {
-    return this.states.filter(({ id }) => id === st)[0];
+    return this.getStates([st])[0];
   }
 }
