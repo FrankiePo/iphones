@@ -1,0 +1,11 @@
+<form novalidate (ngSubmit)="onSubmit(user)" [formGroup]="user">
+  <input
+    type="text"
+    placeholder="Ваше Имя"
+    formControlName="name">
+  <input
+    type="tel"
+    placeholder="Контактный телефон"
+    formControlName="tel">
+  <button class="btn btn-primary" type="submit" [disabled]="user.invalid">Заказать звонок</button>
+</form>

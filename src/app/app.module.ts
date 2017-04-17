@@ -1,20 +1,33 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
+import { ReactiveFormsModule } from '@angular/forms';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AppComponent } from './app.component';
+import { CallFormComponent } from './call-form/call-form.component';
+import { PhoneFormComponent } from './phone-form/phone-form.component';
+import { PhoneTypesService } from "./shared/model/phone-type/phone-types.service";
+import { ColorsService } from "./shared/model/color/colors.service";
+import { SizesService } from "./shared/model/size/sizes.service";
+import { StatesService } from "./shared/model/state/states.service";
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    CallFormComponent,
+    PhoneFormComponent
   ],
   imports: [
     BrowserModule,
-    FormsModule,
-    HttpModule
+    NgbModule.forRoot(),
+    ReactiveFormsModule,
   ],
-  providers: [],
+  providers: [
+    PhoneTypesService,
+    ColorsService,
+    SizesService,
+    StatesService,
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1,0 +1,32 @@
+<form novalidate [formGroup]="phoneGroupForm">
+  <div ngbRadioGroup name="type" formControlName="type">
+    <label class="btn btn-primary" *ngFor="let ptype of pts.getTypes();">
+      <input type="radio" [value]="ptype.type">{{ ptype.smallName }}
+    </label>
+  </div>
+  <hr/>
+  <h3>Модификация:</h3>
+  <div ngbRadioGroup name="size" formControlName="size">
+    <label class="btn btn-primary" *ngFor="let size of getAvailableSizes()">
+      <input type="radio" [value]="size.id">{{ size.name }}
+    </label>
+  </div>
+  <hr/>
+  <div ngbRadioGroup name="color" formControlName="color">
+    <label class="btn btn-primary" *ngFor="let color of getAvailableColors()">
+      <input type="radio" [value]="color.id">{{ color.name }}
+    </label>
+  </div>
+  <hr/>
+  <h3>Состояние:</h3>
+  <div ngbRadioGroup name="state" formControlName="state">
+    <label class="btn btn-primary" *ngFor="let state of getAvailableStates()">
+      <input type="radio" [value]="state.id">{{ state.name }}
+    </label>
+  </div>
+  <ul>
+    <li *ngFor="let li of getDescriptions()">{{ li }}</li>
+  </ul>
+  <hr/>
+  <app-call-form></app-call-form>
+</form>
