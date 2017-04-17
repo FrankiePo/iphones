@@ -1,15 +1,15 @@
 import { TestBed, inject } from '@angular/core/testing';
 
-import { PhoneTypesService } from './phone-types.service';
+import { TypesService } from './types.service';
 
 describe('PhoneTypesService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [PhoneTypesService]
+      providers: [TypesService]
     });
   });
 
-  it('should ...', inject([PhoneTypesService], (service: PhoneTypesService) => {
+  it('should ...', inject([TypesService], (service: TypesService) => {
     expect(service).toBeTruthy();
   }));
 });

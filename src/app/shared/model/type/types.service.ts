@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { IPhoneType } from "./iphone-type";
+import { IType } from "./itype";
 import { PhoneColor, PhoneType, PhoneState, PhoneSize } from "../../constants";
 
 @Injectable()
-export class PhoneTypesService {
-  private phoneTypes: IPhoneType[];
+export class TypesService {
+  private phoneTypes: IType[];
   constructor() {
     this.phoneTypes = [
       {
@@ -97,10 +97,10 @@ export class PhoneTypesService {
       },
     ];
   }
-  getTypes(): IPhoneType[] {
+  getTypes(): IType[] {
     return this.phoneTypes;
   }
-  getType(wantedType: PhoneType): IPhoneType {
+  getType(wantedType: PhoneType): IType {
     return this.phoneTypes.filter(({ type }) => type === wantedType)[0];
   }
 }

@@ -1,6 +1,6 @@
 import { PhoneColor, PhoneSize, PhoneState, PhoneType } from "../../constants";
 
-export interface IPhoneType {
+export interface IType {
   name: string;
   smallName: string;
   type: PhoneType,

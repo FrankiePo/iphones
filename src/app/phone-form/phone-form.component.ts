@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { PhoneTypesService } from "../shared/model/phone-type/phone-types.service";
+import { TypesService } from "../shared/model/type/types.service";
 import { PhoneType } from "../shared/constants";
 import { ColorsService } from "../shared/model/color/colors.service";
 import { SizesService } from "../shared/model/size/sizes.service";
 import { StatesService } from "../shared/model/state/states.service";
 import { IPhone } from "../shared/model/iphone";
-import { IPhoneType } from "../shared/model/phone-type/iphone-type";
+import { IType } from "../shared/model/type/itype";
 import { IState } from "../shared/model/state/istate";
 import { IColor } from "../shared/model/color/icolor";
 import { ISize } from "../shared/model/size/isize";
@@ -18,11 +18,11 @@ import { ISize } from "../shared/model/size/isize";
 })
 export class PhoneFormComponent implements OnInit {
   phoneGroupForm: FormGroup;
-  private chosenType: IPhoneType;
+  private chosenType: IType;
   private chosenPhone: IPhone;
   constructor(
     private fb: FormBuilder,
-    private pts: PhoneTypesService,
+    private pts: TypesService,
     private clr: ColorsService,
     private sz: SizesService,
     private st: StatesService,
