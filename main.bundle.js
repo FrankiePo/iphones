@@ -34,11 +34,11 @@ var CallFormComponent = (function () {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_forms__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__shared_model_phone_type_phone_types_service__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__shared_model_type_types_service__ = __webpack_require__(54);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__shared_constants__ = __webpack_require__(24);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__shared_model_color_colors_service__ = __webpack_require__(51);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__shared_model_size_sizes_service__ = __webpack_require__(53);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__shared_model_state_states_service__ = __webpack_require__(54);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__shared_model_size_sizes_service__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__shared_model_state_states_service__ = __webpack_require__(53);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PhoneFormComponent; });
 
 
@@ -47,76 +47,52 @@ var CallFormComponent = (function () {
 
 
 var PhoneFormComponent = (function () {
-    function PhoneFormComponent(fb, pts, clr, sz, st) {
-        this.fb = fb;
-        this.pts = pts;
-        this.clr = clr;
-        this.sz = sz;
-        this.st = st;
+    function PhoneFormComponent(formBuilder, typesService, colorsService, sizesService, statesService) {
+        this.formBuilder = formBuilder;
+        this.typesService = typesService;
+        this.colorsService = colorsService;
+        this.sizesService = sizesService;
+        this.statesService = statesService;
+        this.types = this.typesService.getTypes();
     }
     PhoneFormComponent.prototype.ngOnInit = function () {
         var _this = this;
         this.setNewType(__WEBPACK_IMPORTED_MODULE_2__shared_constants__["d" /* PhoneType */].I4S);
-        this.phoneGroupForm = this.fb.group(this.chosenPhone);
-        this.phoneGroupForm.valueChanges.subscribe(function (data) {
-            if (_this.chosenPhone.type !== data.type) {
-                _this.setNewType(data.type);
-                _this.phoneGroupForm.patchValue(_this.chosenPhone);
-            }
-            else {
-                _this.chosenPhone = data;
-            }
+        this.setDescriptions(this.chosenPhone.state);
+        this.phoneGroupForm = this.formBuilder.group(this.chosenPhone);
+        this.phoneGroupForm.get('type').valueChanges.subscribe(function (type) {
+            _this.setNewType(type);
+            var newChosenPhone = Object.assign(_this.chosenPhone);
+            delete newChosenPhone.type;
+            _this.phoneGroupForm.patchValue(newChosenPhone, { onlySelf: true, emitEvent: false });
         });
+        ['size', 'color', 'state'].forEach(function (key) {
+            _this.phoneGroupForm.get(key).valueChanges.subscribe(function (data) {
+                _this.chosenPhone = Object.assign(_this.chosenPhone, (_a = {}, _a[key] = data, _a));
+                var _a;
+            });
+        });
+        this.phoneGroupForm.get('state').valueChanges.subscribe(function (state) { return _this.setDescriptions(state); });
+        this.phoneGroupForm.valueChanges.subscribe(function (form) { return console.log(form); });
     };
     PhoneFormComponent.prototype.setNewType = function (newType) {
-        this.chosenType = this.pts.getType(newType);
+        this.chosenType = this.typesService.getType(newType);
         this.chosenPhone = {
             type: this.chosenType.type,
             size: this.chosenType.availableSizes[0],
             color: this.chosenType.availableColors[0],
             state: this.chosenType.availableStates[0],
         };
+        this.available = {
+            sizes: this.sizesService.getSizes(this.chosenType.availableSizes),
+            colors: this.colorsService.getColors(this.chosenType.availableColors),
+            states: this.statesService.getStates(this.chosenType.availableStates),
+        };
     };
-    Object.defineProperty(PhoneFormComponent.prototype, "types", {
-        get: function () {
-            return this.pts.getTypes();
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(PhoneFormComponent.prototype, "availableSizes", {
-        get: function () {
-            var _this = this;
-            return this.chosenType.availableSizes.map(function (sz) { return _this.sz.getSize(sz); });
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(PhoneFormComponent.prototype, "availableColors", {
-        get: function () {
-            var _this = this;
-            return this.chosenType.availableColors.map(function (clr) { return _this.clr.getColor(clr); });
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(PhoneFormComponent.prototype, "availableStates", {
-        get: function () {
-            var _this = this;
-            return this.chosenType.availableStates.map(function (st) { return _this.st.getState(st); });
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(PhoneFormComponent.prototype, "descriptions", {
-        get: function () {
-            console.log("-- Again Descriptions");
-            return this.st.getState(this.chosenPhone.state).desc;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    PhoneFormComponent.ctorParameters = function () { return [{ type: __WEBPACK_IMPORTED_MODULE_0__angular_forms__["b" /* FormBuilder */] }, { type: __WEBPACK_IMPORTED_MODULE_1__shared_model_phone_type_phone_types_service__["a" /* PhoneTypesService */] }, { type: __WEBPACK_IMPORTED_MODULE_3__shared_model_color_colors_service__["a" /* ColorsService */] }, { type: __WEBPACK_IMPORTED_MODULE_4__shared_model_size_sizes_service__["a" /* SizesService */] }, { type: __WEBPACK_IMPORTED_MODULE_5__shared_model_state_states_service__["a" /* StatesService */] }]; };
+    PhoneFormComponent.prototype.setDescriptions = function (state) {
+        this.descriptions = this.statesService.getState(state).desc;
+    };
+    PhoneFormComponent.ctorParameters = function () { return [{ type: __WEBPACK_IMPORTED_MODULE_0__angular_forms__["b" /* FormBuilder */] }, { type: __WEBPACK_IMPORTED_MODULE_1__shared_model_type_types_service__["a" /* TypesService */] }, { type: __WEBPACK_IMPORTED_MODULE_3__shared_model_color_colors_service__["a" /* ColorsService */] }, { type: __WEBPACK_IMPORTED_MODULE_4__shared_model_size_sizes_service__["a" /* SizesService */] }, { type: __WEBPACK_IMPORTED_MODULE_5__shared_model_state_states_service__["a" /* StatesService */] }]; };
     return PhoneFormComponent;
 }());
 
@@ -189,10 +165,10 @@ __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__angular_platform_browser__["a
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__phone_form_phone_form_component_ngfactory__ = __webpack_require__(160);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__app_phone_form_phone_form_component__ = __webpack_require__(123);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__angular_forms__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__app_shared_model_phone_type_phone_types_service__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__app_shared_model_type_types_service__ = __webpack_require__(54);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__app_shared_model_color_colors_service__ = __webpack_require__(51);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__app_shared_model_size_sizes_service__ = __webpack_require__(53);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__app_shared_model_state_states_service__ = __webpack_require__(54);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__app_shared_model_size_sizes_service__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__app_shared_model_state_states_service__ = __webpack_require__(53);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__app_app_component__ = __webpack_require__(173);
 /* unused harmony export RenderType_AppComponent */
 /* unused harmony export View_AppComponent_0 */
@@ -224,7 +200,7 @@ function View_AppComponent_0(l) {
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 1, 'app-phone-form', [], null, null, null, __WEBPACK_IMPORTED_MODULE_2__phone_form_phone_form_component_ngfactory__["a" /* View_PhoneFormComponent_0 */], __WEBPACK_IMPORTED_MODULE_2__phone_form_phone_form_component_ngfactory__["b" /* RenderType_PhoneFormComponent */])),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_23" /* ɵdid */](57344, null, 0, __WEBPACK_IMPORTED_MODULE_3__app_phone_form_phone_form_component__["a" /* PhoneFormComponent */], [
             __WEBPACK_IMPORTED_MODULE_4__angular_forms__["b" /* FormBuilder */],
-            __WEBPACK_IMPORTED_MODULE_5__app_shared_model_phone_type_phone_types_service__["a" /* PhoneTypesService */],
+            __WEBPACK_IMPORTED_MODULE_5__app_shared_model_type_types_service__["a" /* TypesService */],
             __WEBPACK_IMPORTED_MODULE_6__app_shared_model_color_colors_service__["a" /* ColorsService */],
             __WEBPACK_IMPORTED_MODULE_7__app_shared_model_size_sizes_service__["a" /* SizesService */],
             __WEBPACK_IMPORTED_MODULE_8__app_shared_model_state_states_service__["a" /* StatesService */]
@@ -290,10 +266,10 @@ var AppComponentNgFactory = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_25" /*
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_37__ng_bootstrap_ng_bootstrap_rating_rating_config__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_38__ng_bootstrap_ng_bootstrap_tabset_tabset_config__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_39__ng_bootstrap_ng_bootstrap_timepicker_timepicker_config__ = __webpack_require__(45);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_40__app_shared_model_phone_type_phone_types_service__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_40__app_shared_model_type_types_service__ = __webpack_require__(54);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_41__app_shared_model_color_colors_service__ = __webpack_require__(51);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_42__app_shared_model_size_sizes_service__ = __webpack_require__(53);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_43__app_shared_model_state_states_service__ = __webpack_require__(54);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_42__app_shared_model_size_sizes_service__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_43__app_shared_model_state_states_service__ = __webpack_require__(53);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_44__gendir_node_modules_ng_bootstrap_ng_bootstrap_alert_alert_ngfactory__ = __webpack_require__(161);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_45__gendir_node_modules_ng_bootstrap_ng_bootstrap_tooltip_tooltip_ngfactory__ = __webpack_require__(170);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_46__gendir_node_modules_ng_bootstrap_ng_bootstrap_typeahead_typeahead_window_ngfactory__ = __webpack_require__(172);
@@ -769,12 +745,12 @@ var AppModuleInjector = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(AppModuleInjector.prototype, "_PhoneTypesService_67", {
+    Object.defineProperty(AppModuleInjector.prototype, "_TypesService_67", {
         get: function () {
-            if ((this.__PhoneTypesService_67 == null)) {
-                (this.__PhoneTypesService_67 = new __WEBPACK_IMPORTED_MODULE_40__app_shared_model_phone_type_phone_types_service__["a" /* PhoneTypesService */]());
+            if ((this.__TypesService_67 == null)) {
+                (this.__TypesService_67 = new __WEBPACK_IMPORTED_MODULE_40__app_shared_model_type_types_service__["a" /* TypesService */]());
             }
-            return this.__PhoneTypesService_67;
+            return this.__TypesService_67;
         },
         enumerable: true,
         configurable: true
@@ -1046,8 +1022,8 @@ var AppModuleInjector = (function (_super) {
         if ((token === __WEBPACK_IMPORTED_MODULE_12__angular_forms__["b" /* FormBuilder */])) {
             return this._FormBuilder_66;
         }
-        if ((token === __WEBPACK_IMPORTED_MODULE_40__app_shared_model_phone_type_phone_types_service__["a" /* PhoneTypesService */])) {
-            return this._PhoneTypesService_67;
+        if ((token === __WEBPACK_IMPORTED_MODULE_40__app_shared_model_type_types_service__["a" /* TypesService */])) {
+            return this._TypesService_67;
         }
         if ((token === __WEBPACK_IMPORTED_MODULE_41__app_shared_model_color_colors_service__["a" /* ColorsService */])) {
             return this._ColorsService_68;
@@ -1557,10 +1533,10 @@ var CallFormComponentNgFactory = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_2
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__call_form_call_form_component_ngfactory__ = __webpack_require__(158);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__app_call_form_call_form_component__ = __webpack_require__(122);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__app_phone_form_phone_form_component__ = __webpack_require__(123);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__app_shared_model_phone_type_phone_types_service__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__app_shared_model_type_types_service__ = __webpack_require__(54);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__app_shared_model_color_colors_service__ = __webpack_require__(51);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__app_shared_model_size_sizes_service__ = __webpack_require__(53);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__app_shared_model_state_states_service__ = __webpack_require__(54);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__app_shared_model_size_sizes_service__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__app_shared_model_state_states_service__ = __webpack_require__(53);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return RenderType_PhoneFormComponent; });
 /* harmony export (immutable) */ __webpack_exports__["a"] = View_PhoneFormComponent_0;
 /* unused harmony export PhoneFormComponentNgFactory */
@@ -1599,7 +1575,7 @@ function View_PhoneFormComponent_1(l) {
             __WEBPACK_IMPORTED_MODULE_1__angular_core__["W" /* Renderer */],
             __WEBPACK_IMPORTED_MODULE_1__angular_core__["V" /* ElementRef */]
         ], null, null),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n          '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 1, 'input', [[
                 'type',
                 'radio'
@@ -1662,7 +1638,7 @@ function View_PhoneFormComponent_1(l) {
         }, null),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, [
             '',
-            '\n    '
+            '\n        '
         ]))
     ], function (ck, v) {
         var currVal_2 = v.context.$implicit.type;
@@ -1686,7 +1662,7 @@ function View_PhoneFormComponent_2(l) {
             __WEBPACK_IMPORTED_MODULE_1__angular_core__["W" /* Renderer */],
             __WEBPACK_IMPORTED_MODULE_1__angular_core__["V" /* ElementRef */]
         ], null, null),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n          '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 1, 'input', [[
                 'type',
                 'radio'
@@ -1749,7 +1725,7 @@ function View_PhoneFormComponent_2(l) {
         }, null),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, [
             '',
-            '\n    '
+            '\n        '
         ]))
     ], function (ck, v) {
         var currVal_2 = v.context.$implicit.id;
@@ -1773,7 +1749,7 @@ function View_PhoneFormComponent_3(l) {
             __WEBPACK_IMPORTED_MODULE_1__angular_core__["W" /* Renderer */],
             __WEBPACK_IMPORTED_MODULE_1__angular_core__["V" /* ElementRef */]
         ], null, null),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n          '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 1, 'input', [[
                 'type',
                 'radio'
@@ -1836,7 +1812,7 @@ function View_PhoneFormComponent_3(l) {
         }, null),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, [
             '',
-            '\n    '
+            '\n        '
         ]))
     ], function (ck, v) {
         var currVal_2 = v.context.$implicit.id;
@@ -1860,7 +1836,7 @@ function View_PhoneFormComponent_4(l) {
             __WEBPACK_IMPORTED_MODULE_1__angular_core__["W" /* Renderer */],
             __WEBPACK_IMPORTED_MODULE_1__angular_core__["V" /* ElementRef */]
         ], null, null),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n          '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 1, 'input', [[
                 'type',
                 'radio'
@@ -1923,7 +1899,7 @@ function View_PhoneFormComponent_4(l) {
         }, null),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, [
             '',
-            '\n    '
+            '\n        '
         ]))
     ], function (ck, v) {
         var currVal_2 = v.context.$implicit.id;
@@ -1950,7 +1926,13 @@ function View_PhoneFormComponent_5(l) {
 }
 function View_PhoneFormComponent_0(l) {
     return __WEBPACK_IMPORTED_MODULE_1__angular_core__["_21" /* ɵvid */](0, [
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 72, 'form', [[
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 82, 'div', [[
+                'class',
+                'container'
+            ]
+        ], null, null, null, null, null)),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 79, 'form', [[
                 'novalidate',
                 ''
             ]
@@ -2002,11 +1984,11 @@ function View_PhoneFormComponent_0(l) {
         ], function (v, en, $event) {
             var ad = true;
             if (('submit' === en)) {
-                var pd_0 = (__WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 2).onSubmit($event) !== false);
+                var pd_0 = (__WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 4).onSubmit($event) !== false);
                 ad = (pd_0 && ad);
             }
             if (('reset' === en)) {
-                var pd_1 = (__WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 2).onReset() !== false);
+                var pd_1 = (__WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 4).onReset() !== false);
                 ad = (pd_1 && ad);
             }
             return ad;
@@ -2028,7 +2010,13 @@ function View_PhoneFormComponent_0(l) {
         }, null),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_27" /* ɵprd */](1024, null, __WEBPACK_IMPORTED_MODULE_3__angular_forms__["j" /* ControlContainer */], null, [__WEBPACK_IMPORTED_MODULE_3__angular_forms__["i" /* FormGroupDirective */]]),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_23" /* ɵdid */](8192, null, 0, __WEBPACK_IMPORTED_MODULE_3__angular_forms__["k" /* NgControlStatusGroup */], [__WEBPACK_IMPORTED_MODULE_3__angular_forms__["j" /* ControlContainer */]], null, null),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n    '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 12, 'div', [[
+                'class',
+                'row'
+            ]
+        ], null, null, null, null, null)),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 9, 'div', [
             [
                 'class',
@@ -2115,7 +2103,7 @@ function View_PhoneFormComponent_0(l) {
         }, null),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_27" /* ɵprd */](1024, null, __WEBPACK_IMPORTED_MODULE_3__angular_forms__["m" /* NgControl */], null, [__WEBPACK_IMPORTED_MODULE_3__angular_forms__["l" /* FormControlName */]]),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_23" /* ɵdid */](8192, null, 0, __WEBPACK_IMPORTED_MODULE_3__angular_forms__["n" /* NgControlStatus */], [__WEBPACK_IMPORTED_MODULE_3__angular_forms__["m" /* NgControl */]], null, null),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n    '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n        '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_28" /* ɵand */](8388608, null, null, 1, null, View_PhoneFormComponent_1)),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_23" /* ɵdid */](401408, null, 0, __WEBPACK_IMPORTED_MODULE_4__angular_common__["f" /* NgForOf */], [
             __WEBPACK_IMPORTED_MODULE_1__angular_core__["_0" /* ViewContainerRef */],
@@ -2126,13 +2114,18 @@ function View_PhoneFormComponent_0(l) {
                 'ngForOf'
             ]
         }, null),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 0, 'hr', [], null, null, null, null, null)),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n    '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n    '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 15, 'div', [[
+                'class',
+                'row'
+            ]
+        ], null, null, null, null, null)),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 1, 'h3', [], null, null, null, null, null)),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['Модификация:'])),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 9, 'div', [
             [
                 'class',
@@ -2219,7 +2212,7 @@ function View_PhoneFormComponent_0(l) {
         }, null),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_27" /* ɵprd */](1024, null, __WEBPACK_IMPORTED_MODULE_3__angular_forms__["m" /* NgControl */], null, [__WEBPACK_IMPORTED_MODULE_3__angular_forms__["l" /* FormControlName */]]),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_23" /* ɵdid */](8192, null, 0, __WEBPACK_IMPORTED_MODULE_3__angular_forms__["n" /* NgControlStatus */], [__WEBPACK_IMPORTED_MODULE_3__angular_forms__["m" /* NgControl */]], null, null),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n    '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n        '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_28" /* ɵand */](8388608, null, null, 1, null, View_PhoneFormComponent_2)),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_23" /* ɵdid */](401408, null, 0, __WEBPACK_IMPORTED_MODULE_4__angular_common__["f" /* NgForOf */], [
             __WEBPACK_IMPORTED_MODULE_1__angular_core__["_0" /* ViewContainerRef */],
@@ -2230,10 +2223,15 @@ function View_PhoneFormComponent_0(l) {
                 'ngForOf'
             ]
         }, null),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 0, 'hr', [], null, null, null, null, null)),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n    '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n    '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 12, 'div', [[
+                'class',
+                'row'
+            ]
+        ], null, null, null, null, null)),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 9, 'div', [
             [
                 'class',
@@ -2320,7 +2318,7 @@ function View_PhoneFormComponent_0(l) {
         }, null),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_27" /* ɵprd */](1024, null, __WEBPACK_IMPORTED_MODULE_3__angular_forms__["m" /* NgControl */], null, [__WEBPACK_IMPORTED_MODULE_3__angular_forms__["l" /* FormControlName */]]),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_23" /* ɵdid */](8192, null, 0, __WEBPACK_IMPORTED_MODULE_3__angular_forms__["n" /* NgControlStatus */], [__WEBPACK_IMPORTED_MODULE_3__angular_forms__["m" /* NgControl */]], null, null),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n    '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n        '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_28" /* ɵand */](8388608, null, null, 1, null, View_PhoneFormComponent_3)),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_23" /* ɵdid */](401408, null, 0, __WEBPACK_IMPORTED_MODULE_4__angular_common__["f" /* NgForOf */], [
             __WEBPACK_IMPORTED_MODULE_1__angular_core__["_0" /* ViewContainerRef */],
@@ -2331,13 +2329,18 @@ function View_PhoneFormComponent_0(l) {
                 'ngForOf'
             ]
         }, null),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 0, 'hr', [], null, null, null, null, null)),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n    '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n    '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 21, 'div', [[
+                'class',
+                'row'
+            ]
+        ], null, null, null, null, null)),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 1, 'h3', [], null, null, null, null, null)),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['Состояние:'])),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 9, 'div', [
             [
                 'class',
@@ -2424,7 +2427,7 @@ function View_PhoneFormComponent_0(l) {
         }, null),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_27" /* ɵprd */](1024, null, __WEBPACK_IMPORTED_MODULE_3__angular_forms__["m" /* NgControl */], null, [__WEBPACK_IMPORTED_MODULE_3__angular_forms__["l" /* FormControlName */]]),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_23" /* ɵdid */](8192, null, 0, __WEBPACK_IMPORTED_MODULE_3__angular_forms__["n" /* NgControlStatus */], [__WEBPACK_IMPORTED_MODULE_3__angular_forms__["m" /* NgControl */]], null, null),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n    '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n        '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_28" /* ɵand */](8388608, null, null, 1, null, View_PhoneFormComponent_4)),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_23" /* ɵdid */](401408, null, 0, __WEBPACK_IMPORTED_MODULE_4__angular_common__["f" /* NgForOf */], [
             __WEBPACK_IMPORTED_MODULE_1__angular_core__["_0" /* ViewContainerRef */],
@@ -2435,10 +2438,10 @@ function View_PhoneFormComponent_0(l) {
                 'ngForOf'
             ]
         }, null),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 4, 'ul', [], null, null, null, null, null)),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n    '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n        '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_28" /* ɵand */](8388608, null, null, 1, null, View_PhoneFormComponent_5)),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_23" /* ɵdid */](401408, null, 0, __WEBPACK_IMPORTED_MODULE_4__angular_common__["f" /* NgForOf */], [
             __WEBPACK_IMPORTED_MODULE_1__angular_core__["_0" /* ViewContainerRef */],
@@ -2449,78 +2452,85 @@ function View_PhoneFormComponent_0(l) {
                 'ngForOf'
             ]
         }, null),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 0, 'hr', [], null, null, null, null, null)),
-        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n    '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n    '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 4, 'div', [[
+                'class',
+                'row'
+            ]
+        ], null, null, null, null, null)),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n      '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 1, 'app-call-form', [], null, null, null, __WEBPACK_IMPORTED_MODULE_5__call_form_call_form_component_ngfactory__["a" /* View_CallFormComponent_0 */], __WEBPACK_IMPORTED_MODULE_5__call_form_call_form_component_ngfactory__["b" /* RenderType_CallFormComponent */])),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_23" /* ɵdid */](57344, null, 0, __WEBPACK_IMPORTED_MODULE_6__app_call_form_call_form_component__["a" /* CallFormComponent */], [__WEBPACK_IMPORTED_MODULE_3__angular_forms__["b" /* FormBuilder */]], null, null),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n    '])),
+        (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n  '])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n'])),
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_24" /* ɵted */](null, ['\n']))
     ], function (ck, v) {
         var co = v.component;
         var currVal_7 = co.phoneGroupForm;
-        ck(v, 2, 0, currVal_7);
+        ck(v, 4, 0, currVal_7);
         var currVal_15 = 'type';
-        ck(v, 9, 0, currVal_15);
+        ck(v, 13, 0, currVal_15);
         var currVal_16 = co.types;
-        ck(v, 14, 0, currVal_16);
+        ck(v, 18, 0, currVal_16);
         var currVal_24 = 'size';
-        ck(v, 25, 0, currVal_24);
-        var currVal_25 = co.availableSizes;
-        ck(v, 30, 0, currVal_25);
+        ck(v, 30, 0, currVal_24);
+        var currVal_25 = co.available.sizes;
+        ck(v, 35, 0, currVal_25);
         var currVal_33 = 'color';
-        ck(v, 38, 0, currVal_33);
-        var currVal_34 = co.availableColors;
-        ck(v, 43, 0, currVal_34);
+        ck(v, 44, 0, currVal_33);
+        var currVal_34 = co.available.colors;
+        ck(v, 49, 0, currVal_34);
         var currVal_42 = 'state';
-        ck(v, 54, 0, currVal_42);
-        var currVal_43 = co.availableStates;
-        ck(v, 59, 0, currVal_43);
+        ck(v, 61, 0, currVal_42);
+        var currVal_43 = co.available.states;
+        ck(v, 66, 0, currVal_43);
         var currVal_44 = co.descriptions;
-        ck(v, 65, 0, currVal_44);
-        ck(v, 71, 0);
+        ck(v, 72, 0, currVal_44);
+        ck(v, 79, 0);
     }, function (ck, v) {
-        var currVal_0 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 4).ngClassUntouched;
-        var currVal_1 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 4).ngClassTouched;
-        var currVal_2 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 4).ngClassPristine;
-        var currVal_3 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 4).ngClassDirty;
-        var currVal_4 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 4).ngClassValid;
-        var currVal_5 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 4).ngClassInvalid;
-        var currVal_6 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 4).ngClassPending;
-        ck(v, 0, 0, currVal_0, currVal_1, currVal_2, currVal_3, currVal_4, currVal_5, currVal_6);
-        var currVal_8 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 11).ngClassUntouched;
-        var currVal_9 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 11).ngClassTouched;
-        var currVal_10 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 11).ngClassPristine;
-        var currVal_11 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 11).ngClassDirty;
-        var currVal_12 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 11).ngClassValid;
-        var currVal_13 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 11).ngClassInvalid;
-        var currVal_14 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 11).ngClassPending;
-        ck(v, 6, 0, currVal_8, currVal_9, currVal_10, currVal_11, currVal_12, currVal_13, currVal_14);
-        var currVal_17 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 27).ngClassUntouched;
-        var currVal_18 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 27).ngClassTouched;
-        var currVal_19 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 27).ngClassPristine;
-        var currVal_20 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 27).ngClassDirty;
-        var currVal_21 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 27).ngClassValid;
-        var currVal_22 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 27).ngClassInvalid;
-        var currVal_23 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 27).ngClassPending;
-        ck(v, 22, 0, currVal_17, currVal_18, currVal_19, currVal_20, currVal_21, currVal_22, currVal_23);
-        var currVal_26 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 40).ngClassUntouched;
-        var currVal_27 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 40).ngClassTouched;
-        var currVal_28 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 40).ngClassPristine;
-        var currVal_29 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 40).ngClassDirty;
-        var currVal_30 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 40).ngClassValid;
-        var currVal_31 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 40).ngClassInvalid;
-        var currVal_32 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 40).ngClassPending;
-        ck(v, 35, 0, currVal_26, currVal_27, currVal_28, currVal_29, currVal_30, currVal_31, currVal_32);
-        var currVal_35 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 56).ngClassUntouched;
-        var currVal_36 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 56).ngClassTouched;
-        var currVal_37 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 56).ngClassPristine;
-        var currVal_38 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 56).ngClassDirty;
-        var currVal_39 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 56).ngClassValid;
-        var currVal_40 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 56).ngClassInvalid;
-        var currVal_41 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 56).ngClassPending;
-        ck(v, 51, 0, currVal_35, currVal_36, currVal_37, currVal_38, currVal_39, currVal_40, currVal_41);
+        var currVal_0 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 6).ngClassUntouched;
+        var currVal_1 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 6).ngClassTouched;
+        var currVal_2 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 6).ngClassPristine;
+        var currVal_3 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 6).ngClassDirty;
+        var currVal_4 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 6).ngClassValid;
+        var currVal_5 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 6).ngClassInvalid;
+        var currVal_6 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 6).ngClassPending;
+        ck(v, 2, 0, currVal_0, currVal_1, currVal_2, currVal_3, currVal_4, currVal_5, currVal_6);
+        var currVal_8 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 15).ngClassUntouched;
+        var currVal_9 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 15).ngClassTouched;
+        var currVal_10 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 15).ngClassPristine;
+        var currVal_11 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 15).ngClassDirty;
+        var currVal_12 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 15).ngClassValid;
+        var currVal_13 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 15).ngClassInvalid;
+        var currVal_14 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 15).ngClassPending;
+        ck(v, 10, 0, currVal_8, currVal_9, currVal_10, currVal_11, currVal_12, currVal_13, currVal_14);
+        var currVal_17 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 32).ngClassUntouched;
+        var currVal_18 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 32).ngClassTouched;
+        var currVal_19 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 32).ngClassPristine;
+        var currVal_20 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 32).ngClassDirty;
+        var currVal_21 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 32).ngClassValid;
+        var currVal_22 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 32).ngClassInvalid;
+        var currVal_23 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 32).ngClassPending;
+        ck(v, 27, 0, currVal_17, currVal_18, currVal_19, currVal_20, currVal_21, currVal_22, currVal_23);
+        var currVal_26 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 46).ngClassUntouched;
+        var currVal_27 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 46).ngClassTouched;
+        var currVal_28 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 46).ngClassPristine;
+        var currVal_29 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 46).ngClassDirty;
+        var currVal_30 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 46).ngClassValid;
+        var currVal_31 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 46).ngClassInvalid;
+        var currVal_32 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 46).ngClassPending;
+        ck(v, 41, 0, currVal_26, currVal_27, currVal_28, currVal_29, currVal_30, currVal_31, currVal_32);
+        var currVal_35 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 63).ngClassUntouched;
+        var currVal_36 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 63).ngClassTouched;
+        var currVal_37 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 63).ngClassPristine;
+        var currVal_38 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 63).ngClassDirty;
+        var currVal_39 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 63).ngClassValid;
+        var currVal_40 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 63).ngClassInvalid;
+        var currVal_41 = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_26" /* ɵnov */](v, 63).ngClassPending;
+        ck(v, 58, 0, currVal_35, currVal_36, currVal_37, currVal_38, currVal_39, currVal_40, currVal_41);
     });
 }
 function View_PhoneFormComponent_Host_0(l) {
@@ -2528,7 +2538,7 @@ function View_PhoneFormComponent_Host_0(l) {
         (l()(), __WEBPACK_IMPORTED_MODULE_1__angular_core__["_22" /* ɵeld */](0, null, null, 1, 'app-phone-form', [], null, null, null, View_PhoneFormComponent_0, RenderType_PhoneFormComponent)),
         __WEBPACK_IMPORTED_MODULE_1__angular_core__["_23" /* ɵdid */](57344, null, 0, __WEBPACK_IMPORTED_MODULE_7__app_phone_form_phone_form_component__["a" /* PhoneFormComponent */], [
             __WEBPACK_IMPORTED_MODULE_3__angular_forms__["b" /* FormBuilder */],
-            __WEBPACK_IMPORTED_MODULE_8__app_shared_model_phone_type_phone_types_service__["a" /* PhoneTypesService */],
+            __WEBPACK_IMPORTED_MODULE_8__app_shared_model_type_types_service__["a" /* TypesService */],
             __WEBPACK_IMPORTED_MODULE_9__app_shared_model_color_colors_service__["a" /* ColorsService */],
             __WEBPACK_IMPORTED_MODULE_10__app_shared_model_size_sizes_service__["a" /* SizesService */],
             __WEBPACK_IMPORTED_MODULE_11__app_shared_model_state_states_service__["a" /* StatesService */]
@@ -2538,7 +2548,7 @@ function View_PhoneFormComponent_Host_0(l) {
     }, null);
 }
 var PhoneFormComponentNgFactory = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_25" /* ɵccf */]('app-phone-form', __WEBPACK_IMPORTED_MODULE_7__app_phone_form_phone_form_component__["a" /* PhoneFormComponent */], View_PhoneFormComponent_Host_0, {}, {}, []);
-//# sourceMappingURL=data:application/json;base64,eyJmaWxlIjoiL1VzZXJzL2ZyYW5raWVwby9Qcm9qZWN0cy9pcGhvbmUvc3JjL2FwcC9waG9uZS1mb3JtL3Bob25lLWZvcm0uY29tcG9uZW50Lm5nZmFjdG9yeS50cyIsInZlcnNpb24iOjMsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIm5nOi8vL1VzZXJzL2ZyYW5raWVwby9Qcm9qZWN0cy9pcGhvbmUvc3JjL2FwcC9waG9uZS1mb3JtL3Bob25lLWZvcm0uY29tcG9uZW50LnRzIiwibmc6Ly8vVXNlcnMvZnJhbmtpZXBvL1Byb2plY3RzL2lwaG9uZS9zcmMvYXBwL3Bob25lLWZvcm0vcGhvbmUtZm9ybS5jb21wb25lbnQuaHRtbCIsIm5nOi8vL1VzZXJzL2ZyYW5raWVwby9Qcm9qZWN0cy9pcGhvbmUvc3JjL2FwcC9waG9uZS1mb3JtL3Bob25lLWZvcm0uY29tcG9uZW50LnRzLlBob25lRm9ybUNvbXBvbmVudF9Ib3N0Lmh0bWwiXSwic291cmNlc0NvbnRlbnQiOlsiICIsIjxmb3JtIG5vdmFsaWRhdGUgW2Zvcm1Hcm91cF09XCJwaG9uZUdyb3VwRm9ybVwiPlxuICA8ZGl2IG5nYlJhZGlvR3JvdXAgbmFtZT1cInR5cGVcIiBmb3JtQ29udHJvbE5hbWU9XCJ0eXBlXCI+XG4gICAgPGxhYmVsIGNsYXNzPVwiYnRuIGJ0bi1wcmltYXJ5XCIgKm5nRm9yPVwibGV0IHB0eXBlIG9mIHR5cGVzXCI+XG4gICAgICA8aW5wdXQgdHlwZT1cInJhZGlvXCIgW3ZhbHVlXT1cInB0eXBlLnR5cGVcIj57eyBwdHlwZS5zbWFsbE5hbWUgfX1cbiAgICA8L2xhYmVsPlxuICA8L2Rpdj5cbiAgPGhyLz5cbiAgPGgzPtCc0L7QtNC40YTQuNC60LDRhtC40Y86PC9oMz5cbiAgPGRpdiBuZ2JSYWRpb0dyb3VwIG5hbWU9XCJzaXplXCIgZm9ybUNvbnRyb2xOYW1lPVwic2l6ZVwiPlxuICAgIDxsYWJlbCBjbGFzcz1cImJ0biBidG4tcHJpbWFyeVwiICpuZ0Zvcj1cImxldCBzaXplIG9mIGF2YWlsYWJsZVNpemVzXCI+XG4gICAgICA8aW5wdXQgdHlwZT1cInJhZGlvXCIgW3ZhbHVlXT1cInNpemUuaWRcIj57eyBzaXplLm5hbWUgfX1cbiAgICA8L2xhYmVsPlxuICA8L2Rpdj5cbiAgPGhyLz5cbiAgPGRpdiBuZ2JSYWRpb0dyb3VwIG5hbWU9XCJjb2xvclwiIGZvcm1Db250cm9sTmFtZT1cImNvbG9yXCI+XG4gICAgPGxhYmVsIGNsYXNzPVwiYnRuIGJ0bi1wcmltYXJ5XCIgKm5nRm9yPVwibGV0IGNvbG9yIG9mIGF2YWlsYWJsZUNvbG9yc1wiPlxuICAgICAgPGlucHV0IHR5cGU9XCJyYWRpb1wiIFt2YWx1ZV09XCJjb2xvci5pZFwiPnt7IGNvbG9yLm5hbWUgfX1cbiAgICA8L2xhYmVsPlxuICA8L2Rpdj5cbiAgPGhyLz5cbiAgPGgzPtCh0L7RgdGC0L7Rj9C90LjQtTo8L2gzPlxuICA8ZGl2IG5nYlJhZGlvR3JvdXAgbmFtZT1cInN0YXRlXCIgZm9ybUNvbnRyb2xOYW1lPVwic3RhdGVcIj5cbiAgICA8bGFiZWwgY2xhc3M9XCJidG4gYnRuLXByaW1hcnlcIiAqbmdGb3I9XCJsZXQgc3RhdGUgb2YgYXZhaWxhYmxlU3RhdGVzXCI+XG4gICAgICA8aW5wdXQgdHlwZT1cInJhZGlvXCIgW3ZhbHVlXT1cInN0YXRlLmlkXCI+e3sgc3RhdGUubmFtZSB9fVxuICAgIDwvbGFiZWw+XG4gIDwvZGl2PlxuICA8dWw+XG4gICAgPGxpICpuZ0Zvcj1cImxldCBsaSBvZiBkZXNjcmlwdGlvbnNcIj57eyBsaSB9fTwvbGk+XG4gIDwvdWw+XG4gIDxoci8+XG4gIDxhcHAtY2FsbC1mb3JtPjwvYXBwLWNhbGwtZm9ybT5cbjwvZm9ybT5cbiIsIjxhcHAtcGhvbmUtZm9ybT48L2FwcC1waG9uZS1mb3JtPiJdLCJtYXBwaW5ncyI6IkFBQUE7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O01DRUk7UUFBQTtRQUFBO01BQUE7SUFBQTtnQkFBQTs7O0lBQUE7S0FBQTtJQUEyRDtNQUN6RDtRQUFBO1FBQUE7TUFBQTtJQUFBO01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztJQUFBO0tBQUE7TUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7TUFBQTs7SUFBQTtLQUFBO01BQUE7TUFBQTtRQUFBO1FBQUE7TUFBQTtNQUFBO1FBQUE7UUFBQTtNQUFBO01BQUE7UUFBQTtRQUFBO01BQUE7TUFBQTtJQUFBO2dCQUFBO01BQUE7UUFBQTs7TUFBQTs7TUFBQTtRQUFBOztNQUFBOzs7O0lBQUE7T0FBQTtRQUFBO1FBQUE7TUFBQTtJQUFBO0lBQXlDO01BQUE7TUFBQTtJQUFBO0lBQUE7OztJQUFyQjtJQUFwQixTQUFvQixTQUFwQjs7SUFBQTtJQUFBO0lBQUEsU0FBQSxtQkFBQTtJQUF5QztJQUFBOzs7OztNQU0zQztRQUFBO1FBQUE7TUFBQTtJQUFBO2dCQUFBOzs7SUFBQTtLQUFBO0lBQW1FO01BQ2pFO1FBQUE7UUFBQTtNQUFBO0lBQUE7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztJQUFBO0tBQUE7TUFBQTtNQUFBO1FBQUE7UUFBQTtNQUFBO01BQUE7UUFBQTtRQUFBO01BQUE7TUFBQTtRQUFBO1FBQUE7TUFBQTtNQUFBO0lBQUE7Z0JBQUE7TUFBQTtRQUFBOztNQUFBOztNQUFBO1FBQUE7O01BQUE7Ozs7SUFBQTtPQUFBO1FBQUE7UUFBQTtNQUFBO0lBQUE7SUFBc0M7TUFBQTtNQUFBO0lBQUE7SUFBQTs7O0lBQWxCO0lBQXBCLFNBQW9CLFNBQXBCOztJQUFBO0lBQUE7SUFBQSxTQUFBLG1CQUFBO0lBQXNDO0lBQUE7Ozs7O01BS3hDO1FBQUE7UUFBQTtNQUFBO0lBQUE7Z0JBQUE7OztJQUFBO0tBQUE7SUFBcUU7TUFDbkU7UUFBQTtRQUFBO01BQUE7SUFBQTtNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7SUFBQTtLQUFBO01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtNQUFBO01BQUE7UUFBQTtRQUFBO01BQUE7TUFBQTtRQUFBO1FBQUE7TUFBQTtNQUFBO1FBQUE7UUFBQTtNQUFBO01BQUE7SUFBQTtnQkFBQTtNQUFBO1FBQUE7O01BQUE7O01BQUE7UUFBQTs7TUFBQTs7OztJQUFBO09BQUE7UUFBQTtRQUFBO01BQUE7SUFBQTtJQUF1QztNQUFBO01BQUE7SUFBQTtJQUFBOzs7SUFBbkI7SUFBcEIsU0FBb0IsU0FBcEI7O0lBQUE7SUFBQTtJQUFBLFNBQUEsbUJBQUE7SUFBdUM7SUFBQTs7Ozs7TUFNekM7UUFBQTtRQUFBO01BQUE7SUFBQTtnQkFBQTs7O0lBQUE7S0FBQTtJQUFxRTtNQUNuRTtRQUFBO1FBQUE7TUFBQTtJQUFBO01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztJQUFBO0tBQUE7TUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7TUFBQTs7SUFBQTtLQUFBO01BQUE7TUFBQTtRQUFBO1FBQUE7TUFBQTtNQUFBO1FBQUE7UUFBQTtNQUFBO01BQUE7UUFBQTtRQUFBO01BQUE7TUFBQTtJQUFBO2dCQUFBO01BQUE7UUFBQTs7TUFBQTs7TUFBQTtRQUFBOztNQUFBOzs7O0lBQUE7T0FBQTtRQUFBO1FBQUE7TUFBQTtJQUFBO0lBQXVDO01BQUE7TUFBQTtJQUFBO0lBQUE7OztJQUFuQjtJQUFwQixTQUFvQixTQUFwQjs7SUFBQTtJQUFBO0lBQUEsU0FBQSxtQkFBQTtJQUF1QztJQUFBOzs7OztJQUl6QztJQUFvQztNQUFBO01BQUE7SUFBQTtJQUFBOzs7SUFBQTtJQUFBOzs7OztNQTNCeEM7UUFBQTtRQUFBO01BQUE7SUFBQTtNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztJQUFBO0tBQUE7TUFBQTtNQUFBO1FBQUE7UUFBQTtNQUFBO01BQUE7UUFBQTtRQUFBO01BQUE7TUFBQTtJQUFBO2dCQUFBO2dCQUFBO01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7T0FBQTtRQUFBO1FBQUE7TUFBQTtJQUFBO2dCQUFBO2dCQUFBO0lBQThDO0lBQzVDO01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtnQkFBQTtnQkFBQTtNQUFBO0lBQUE7Z0JBQUE7TUFBQTtRQUFBOztNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7O01BQUE7O0lBQUE7T0FBQTtRQUFBO1FBQUE7TUFBQTtJQUFBO2dCQUFBO2dCQUFBO0lBQXNEO0lBQ3BEO2dCQUFBOzs7O0lBQUE7T0FBQTtRQUFBO1FBQUE7TUFBQTtJQUFBO0lBRVE7SUFDSjtJQUNOO0lBQUs7SUFDTDtJQUFJO0lBQWlCO0lBQ3JCO01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtnQkFBQTtnQkFBQTtNQUFBO0lBQUE7Z0JBQUE7TUFBQTtRQUFBOztNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7O01BQUE7O0lBQUE7T0FBQTtRQUFBO1FBQUE7TUFBQTtJQUFBO2dCQUFBO2dCQUFBO0lBQXNEO0lBQ3BEO2dCQUFBOzs7O0lBQUE7T0FBQTtRQUFBO1FBQUE7TUFBQTtJQUFBO0lBRVE7SUFDSjtJQUNOO0lBQUs7SUFDTDtNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztJQUFBO0tBQUE7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztJQUFBO0tBQUE7Z0JBQUE7Z0JBQUE7TUFBQTtJQUFBO2dCQUFBO01BQUE7UUFBQTs7TUFBQTs7TUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBOztNQUFBOztJQUFBO09BQUE7UUFBQTtRQUFBO01BQUE7SUFBQTtnQkFBQTtnQkFBQTtJQUF3RDtJQUN0RDtnQkFBQTs7OztJQUFBO09BQUE7UUFBQTtRQUFBO01BQUE7SUFBQTtJQUVRO0lBQ0o7SUFDTjtJQUFLO0lBQ0w7SUFBSTtJQUFlO0lBQ25CO01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtnQkFBQTtnQkFBQTtNQUFBO0lBQUE7Z0JBQUE7TUFBQTtRQUFBOztNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7O01BQUE7O0lBQUE7T0FBQTtRQUFBO1FBQUE7TUFBQTtJQUFBO2dCQUFBO2dCQUFBO0lBQXdEO0lBQ3REO2dCQUFBOzs7O0lBQUE7T0FBQTtRQUFBO1FBQUE7TUFBQTtJQUFBO0lBRVE7SUFDSjtJQUNOO0lBQUk7SUFDRjtnQkFBQTs7OztJQUFBO09BQUE7UUFBQTtRQUFBO01BQUE7SUFBQTtJQUFpRDtJQUM5QztJQUNMO0lBQUs7SUFDTDtnQkFBQTtJQUErQjtJQUMxQjs7OztJQS9CVTtJQUFqQixTQUFpQixTQUFqQjtJQUNpQztJQUEvQixTQUErQixVQUEvQjtJQUNpQztJQUEvQixVQUErQixVQUEvQjtJQU02QjtJQUEvQixVQUErQixVQUEvQjtJQUNpQztJQUEvQixVQUErQixVQUEvQjtJQUs4QjtJQUFoQyxVQUFnQyxVQUFoQztJQUNpQztJQUEvQixVQUErQixVQUEvQjtJQU04QjtJQUFoQyxVQUFnQyxVQUFoQztJQUNpQztJQUEvQixVQUErQixVQUEvQjtJQUtJO0lBQUosVUFBSSxVQUFKO0lBR0Y7O0lBOUJGO0lBQUE7SUFBQTtJQUFBO0lBQUE7SUFBQTtJQUFBO0lBQUEsU0FBQSxxRUFBQTtJQUNFO0lBQUE7SUFBQTtJQUFBO0lBQUE7SUFBQTtJQUFBO0lBQUEsU0FBQSwwRUFBQTtJQU9BO0lBQUE7SUFBQTtJQUFBO0lBQUE7SUFBQTtJQUFBO0lBQUEsVUFBQSw0RUFBQTtJQU1BO0lBQUE7SUFBQTtJQUFBO0lBQUE7SUFBQTtJQUFBO0lBQUEsVUFBQSw0RUFBQTtJQU9BO0lBQUE7SUFBQTtJQUFBO0lBQUE7SUFBQTtJQUFBO0lBQUEsVUFBQSw0RUFBQTs7Ozs7SUNyQkY7Z0JBQUE7Ozs7OztJQUFBO0tBQUE7OztJQUFBOzs7In0=
+//# sourceMappingURL=data:application/json;base64,eyJmaWxlIjoiL1VzZXJzL2ZyYW5raWVwby9Qcm9qZWN0cy9pcGhvbmUvc3JjL2FwcC9waG9uZS1mb3JtL3Bob25lLWZvcm0uY29tcG9uZW50Lm5nZmFjdG9yeS50cyIsInZlcnNpb24iOjMsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIm5nOi8vL1VzZXJzL2ZyYW5raWVwby9Qcm9qZWN0cy9pcGhvbmUvc3JjL2FwcC9waG9uZS1mb3JtL3Bob25lLWZvcm0uY29tcG9uZW50LnRzIiwibmc6Ly8vVXNlcnMvZnJhbmtpZXBvL1Byb2plY3RzL2lwaG9uZS9zcmMvYXBwL3Bob25lLWZvcm0vcGhvbmUtZm9ybS5jb21wb25lbnQuaHRtbCIsIm5nOi8vL1VzZXJzL2ZyYW5raWVwby9Qcm9qZWN0cy9pcGhvbmUvc3JjL2FwcC9waG9uZS1mb3JtL3Bob25lLWZvcm0uY29tcG9uZW50LnRzLlBob25lRm9ybUNvbXBvbmVudF9Ib3N0Lmh0bWwiXSwic291cmNlc0NvbnRlbnQiOlsiICIsIjxkaXYgY2xhc3M9XCJjb250YWluZXJcIj5cbiAgPGZvcm0gbm92YWxpZGF0ZSBbZm9ybUdyb3VwXT1cInBob25lR3JvdXBGb3JtXCI+XG4gICAgPGRpdiBjbGFzcz1cInJvd1wiPlxuICAgICAgPGRpdiBuZ2JSYWRpb0dyb3VwIG5hbWU9XCJ0eXBlXCIgZm9ybUNvbnRyb2xOYW1lPVwidHlwZVwiPlxuICAgICAgICA8bGFiZWwgY2xhc3M9XCJidG4gYnRuLXByaW1hcnlcIiAqbmdGb3I9XCJsZXQgcHR5cGUgb2YgdHlwZXNcIj5cbiAgICAgICAgICA8aW5wdXQgdHlwZT1cInJhZGlvXCIgW3ZhbHVlXT1cInB0eXBlLnR5cGVcIj57eyBwdHlwZS5zbWFsbE5hbWUgfX1cbiAgICAgICAgPC9sYWJlbD5cbiAgICAgIDwvZGl2PlxuICAgIDwvZGl2PlxuICAgIDxkaXYgY2xhc3M9XCJyb3dcIj5cbiAgICAgIDxoMz7QnNC+0LTQuNGE0LjQutCw0YbQuNGPOjwvaDM+XG4gICAgICA8ZGl2IG5nYlJhZGlvR3JvdXAgbmFtZT1cInNpemVcIiBmb3JtQ29udHJvbE5hbWU9XCJzaXplXCI+XG4gICAgICAgIDxsYWJlbCBjbGFzcz1cImJ0biBidG4tcHJpbWFyeVwiICpuZ0Zvcj1cImxldCBzaXplIG9mIGF2YWlsYWJsZS5zaXplc1wiPlxuICAgICAgICAgIDxpbnB1dCB0eXBlPVwicmFkaW9cIiBbdmFsdWVdPVwic2l6ZS5pZFwiPnt7IHNpemUubmFtZSB9fVxuICAgICAgICA8L2xhYmVsPlxuICAgICAgPC9kaXY+XG4gICAgPC9kaXY+XG4gICAgPGRpdiBjbGFzcz1cInJvd1wiPlxuICAgICAgPGRpdiBuZ2JSYWRpb0dyb3VwIG5hbWU9XCJjb2xvclwiIGZvcm1Db250cm9sTmFtZT1cImNvbG9yXCI+XG4gICAgICAgIDxsYWJlbCBjbGFzcz1cImJ0biBidG4tcHJpbWFyeVwiICpuZ0Zvcj1cImxldCBjb2xvciBvZiBhdmFpbGFibGUuY29sb3JzXCI+XG4gICAgICAgICAgPGlucHV0IHR5cGU9XCJyYWRpb1wiIFt2YWx1ZV09XCJjb2xvci5pZFwiPnt7IGNvbG9yLm5hbWUgfX1cbiAgICAgICAgPC9sYWJlbD5cbiAgICAgIDwvZGl2PlxuICAgIDwvZGl2PlxuICAgIDxkaXYgY2xhc3M9XCJyb3dcIj5cbiAgICAgIDxoMz7QodC+0YHRgtC+0Y/QvdC40LU6PC9oMz5cbiAgICAgIDxkaXYgbmdiUmFkaW9Hcm91cCBuYW1lPVwic3RhdGVcIiBmb3JtQ29udHJvbE5hbWU9XCJzdGF0ZVwiPlxuICAgICAgICA8bGFiZWwgY2xhc3M9XCJidG4gYnRuLXByaW1hcnlcIiAqbmdGb3I9XCJsZXQgc3RhdGUgb2YgYXZhaWxhYmxlLnN0YXRlc1wiPlxuICAgICAgICAgIDxpbnB1dCB0eXBlPVwicmFkaW9cIiBbdmFsdWVdPVwic3RhdGUuaWRcIj57eyBzdGF0ZS5uYW1lIH19XG4gICAgICAgIDwvbGFiZWw+XG4gICAgICA8L2Rpdj5cbiAgICAgIDx1bD5cbiAgICAgICAgPGxpICpuZ0Zvcj1cImxldCBsaSBvZiBkZXNjcmlwdGlvbnNcIj57eyBsaSB9fTwvbGk+XG4gICAgICA8L3VsPlxuICAgIDwvZGl2PlxuICAgIDxkaXYgY2xhc3M9XCJyb3dcIj5cbiAgICAgIDxhcHAtY2FsbC1mb3JtPjwvYXBwLWNhbGwtZm9ybT5cbiAgICA8L2Rpdj5cbiAgPC9mb3JtPlxuPC9kaXY+XG4iLCI8YXBwLXBob25lLWZvcm0+PC9hcHAtcGhvbmUtZm9ybT4iXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztNQ0lRO1FBQUE7UUFBQTtNQUFBO0lBQUE7Z0JBQUE7OztJQUFBO0tBQUE7SUFBMkQ7TUFDekQ7UUFBQTtRQUFBO01BQUE7SUFBQTtNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7SUFBQTtLQUFBO01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtNQUFBO01BQUE7UUFBQTtRQUFBO01BQUE7TUFBQTtRQUFBO1FBQUE7TUFBQTtNQUFBO1FBQUE7UUFBQTtNQUFBO01BQUE7SUFBQTtnQkFBQTtNQUFBO1FBQUE7O01BQUE7O01BQUE7UUFBQTs7TUFBQTs7OztJQUFBO09BQUE7UUFBQTtRQUFBO01BQUE7SUFBQTtJQUF5QztNQUFBO01BQUE7SUFBQTtJQUFBOzs7SUFBckI7SUFBcEIsU0FBb0IsU0FBcEI7O0lBQUE7SUFBQTtJQUFBLFNBQUEsbUJBQUE7SUFBeUM7SUFBQTs7Ozs7TUFPM0M7UUFBQTtRQUFBO01BQUE7SUFBQTtnQkFBQTs7O0lBQUE7S0FBQTtJQUFvRTtNQUNsRTtRQUFBO1FBQUE7TUFBQTtJQUFBO01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztJQUFBO0tBQUE7TUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7TUFBQTs7SUFBQTtLQUFBO01BQUE7TUFBQTtRQUFBO1FBQUE7TUFBQTtNQUFBO1FBQUE7UUFBQTtNQUFBO01BQUE7UUFBQTtRQUFBO01BQUE7TUFBQTtJQUFBO2dCQUFBO01BQUE7UUFBQTs7TUFBQTs7TUFBQTtRQUFBOztNQUFBOzs7O0lBQUE7T0FBQTtRQUFBO1FBQUE7TUFBQTtJQUFBO0lBQXNDO01BQUE7TUFBQTtJQUFBO0lBQUE7OztJQUFsQjtJQUFwQixTQUFvQixTQUFwQjs7SUFBQTtJQUFBO0lBQUEsU0FBQSxtQkFBQTtJQUFzQztJQUFBOzs7OztNQU14QztRQUFBO1FBQUE7TUFBQTtJQUFBO2dCQUFBOzs7SUFBQTtLQUFBO0lBQXNFO01BQ3BFO1FBQUE7UUFBQTtNQUFBO0lBQUE7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztJQUFBO0tBQUE7TUFBQTtNQUFBO1FBQUE7UUFBQTtNQUFBO01BQUE7UUFBQTtRQUFBO01BQUE7TUFBQTtRQUFBO1FBQUE7TUFBQTtNQUFBO0lBQUE7Z0JBQUE7TUFBQTtRQUFBOztNQUFBOztNQUFBO1FBQUE7O01BQUE7Ozs7SUFBQTtPQUFBO1FBQUE7UUFBQTtNQUFBO0lBQUE7SUFBdUM7TUFBQTtNQUFBO0lBQUE7SUFBQTs7O0lBQW5CO0lBQXBCLFNBQW9CLFNBQXBCOztJQUFBO0lBQUE7SUFBQSxTQUFBLG1CQUFBO0lBQXVDO0lBQUE7Ozs7O01BT3pDO1FBQUE7UUFBQTtNQUFBO0lBQUE7Z0JBQUE7OztJQUFBO0tBQUE7SUFBc0U7TUFDcEU7UUFBQTtRQUFBO01BQUE7SUFBQTtNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7SUFBQTtLQUFBO01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtNQUFBO01BQUE7UUFBQTtRQUFBO01BQUE7TUFBQTtRQUFBO1FBQUE7TUFBQTtNQUFBO1FBQUE7UUFBQTtNQUFBO01BQUE7SUFBQTtnQkFBQTtNQUFBO1FBQUE7O01BQUE7O01BQUE7UUFBQTs7TUFBQTs7OztJQUFBO09BQUE7UUFBQTtRQUFBO01BQUE7SUFBQTtJQUF1QztNQUFBO01BQUE7SUFBQTtJQUFBOzs7SUFBbkI7SUFBcEIsU0FBb0IsU0FBcEI7O0lBQUE7SUFBQTtJQUFBLFNBQUEsbUJBQUE7SUFBdUM7SUFBQTs7Ozs7SUFJekM7SUFBb0M7TUFBQTtNQUFBO0lBQUE7SUFBQTs7O0lBQUE7SUFBQTs7Ozs7TUFoQzVDO1FBQUE7UUFBQTtNQUFBO0lBQUE7SUFBdUI7TUFDckI7UUFBQTtRQUFBO01BQUE7SUFBQTtNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztJQUFBO0tBQUE7TUFBQTtNQUFBO1FBQUE7UUFBQTtNQUFBO01BQUE7UUFBQTtRQUFBO01BQUE7TUFBQTtJQUFBO2dCQUFBO2dCQUFBO01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7T0FBQTtRQUFBO1FBQUE7TUFBQTtJQUFBO2dCQUFBO2dCQUFBO0lBQThDO01BQzVDO1FBQUE7UUFBQTtNQUFBO0lBQUE7SUFBaUI7SUFDZjtNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztJQUFBO0tBQUE7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztJQUFBO0tBQUE7Z0JBQUE7Z0JBQUE7TUFBQTtJQUFBO2dCQUFBO01BQUE7UUFBQTs7TUFBQTs7TUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBOztNQUFBOztJQUFBO09BQUE7UUFBQTtRQUFBO01BQUE7SUFBQTtnQkFBQTtnQkFBQTtJQUFzRDtJQUNwRDtnQkFBQTs7OztJQUFBO09BQUE7UUFBQTtRQUFBO01BQUE7SUFBQTtJQUVRO0lBQ0o7SUFDRjtNQUNOO1FBQUE7UUFBQTtNQUFBO0lBQUE7SUFBaUI7SUFDZjtJQUFJO0lBQWlCO0lBQ3JCO01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtnQkFBQTtnQkFBQTtNQUFBO0lBQUE7Z0JBQUE7TUFBQTtRQUFBOztNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7O01BQUE7O0lBQUE7T0FBQTtRQUFBO1FBQUE7TUFBQTtJQUFBO2dCQUFBO2dCQUFBO0lBQXNEO0lBQ3BEO2dCQUFBOzs7O0lBQUE7T0FBQTtRQUFBO1FBQUE7TUFBQTtJQUFBO0lBRVE7SUFDSjtJQUNGO01BQ047UUFBQTtRQUFBO01BQUE7SUFBQTtJQUFpQjtJQUNmO01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O0lBQUE7S0FBQTtnQkFBQTtnQkFBQTtNQUFBO0lBQUE7Z0JBQUE7TUFBQTtRQUFBOztNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7O01BQUE7O0lBQUE7T0FBQTtRQUFBO1FBQUE7TUFBQTtJQUFBO2dCQUFBO2dCQUFBO0lBQXdEO0lBQ3REO2dCQUFBOzs7O0lBQUE7T0FBQTtRQUFBO1FBQUE7TUFBQTtJQUFBO0lBRVE7SUFDSjtJQUNGO01BQ047UUFBQTtRQUFBO01BQUE7SUFBQTtJQUFpQjtJQUNmO0lBQUk7SUFBZTtJQUNuQjtNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtNQUFBOztJQUFBO0tBQUE7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztNQUFBO1FBQUE7UUFBQTtRQUFBO01BQUE7O01BQUE7UUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7UUFBQTtNQUFBOztJQUFBO0tBQUE7Z0JBQUE7Z0JBQUE7TUFBQTtJQUFBO2dCQUFBO01BQUE7UUFBQTs7TUFBQTs7TUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBO1FBQUE7TUFBQTs7TUFBQTtRQUFBOztNQUFBOztJQUFBO09BQUE7UUFBQTtRQUFBO01BQUE7SUFBQTtnQkFBQTtnQkFBQTtJQUF3RDtJQUN0RDtnQkFBQTs7OztJQUFBO09BQUE7UUFBQTtRQUFBO01BQUE7SUFBQTtJQUVRO0lBQ0o7SUFDTjtJQUFJO0lBQ0Y7Z0JBQUE7Ozs7SUFBQTtPQUFBO1FBQUE7UUFBQTtNQUFBO0lBQUE7SUFBaUQ7SUFDOUM7SUFDRDtNQUNOO1FBQUE7UUFBQTtNQUFBO0lBQUE7SUFBaUI7SUFDZjtnQkFBQTtJQUErQjtJQUMzQjtJQUNEO0lBQ0g7Ozs7SUF0Q2E7SUFBakIsU0FBaUIsU0FBakI7SUFFbUM7SUFBL0IsVUFBK0IsVUFBL0I7SUFDaUM7SUFBL0IsVUFBK0IsVUFBL0I7SUFPNkI7SUFBL0IsVUFBK0IsVUFBL0I7SUFDaUM7SUFBL0IsVUFBK0IsVUFBL0I7SUFNOEI7SUFBaEMsVUFBZ0MsVUFBaEM7SUFDaUM7SUFBL0IsVUFBK0IsVUFBL0I7SUFPOEI7SUFBaEMsVUFBZ0MsVUFBaEM7SUFDaUM7SUFBL0IsVUFBK0IsVUFBL0I7SUFLSTtJQUFKLFVBQUksVUFBSjtJQUlGOztJQW5DSjtJQUFBO0lBQUE7SUFBQTtJQUFBO0lBQUE7SUFBQTtJQUFBLFNBQUEscUVBQUE7SUFFSTtJQUFBO0lBQUE7SUFBQTtJQUFBO0lBQUE7SUFBQTtJQUFBLFVBQUEsMEVBQUE7SUFRQTtJQUFBO0lBQUE7SUFBQTtJQUFBO0lBQUE7SUFBQTtJQUFBLFVBQUEsNEVBQUE7SUFPQTtJQUFBO0lBQUE7SUFBQTtJQUFBO0lBQUE7SUFBQTtJQUFBLFVBQUEsNEVBQUE7SUFRQTtJQUFBO0lBQUE7SUFBQTtJQUFBO0lBQUE7SUFBQTtJQUFBLFVBQUEsNEVBQUE7Ozs7O0lDMUJOO2dCQUFBOzs7Ozs7SUFBQTtLQUFBOzs7SUFBQTs7OyJ9
 //# sourceMappingURL=phone-form.component.ngfactory.js.map
 
 /***/ }),
@@ -4685,11 +4695,14 @@ var ColorsService = (function () {
             }
         ];
     }
-    ColorsService.prototype.getColors = function () {
-        return this.colors;
+    ColorsService.prototype.getColors = function (ids) {
+        return this.colors.filter(function (_a) {
+            var id = _a.id;
+            return ids.indexOf(id) >= 0;
+        });
     };
-    ColorsService.prototype.getColor = function (color) {
-        return this.colors.filter(function (item) { return item.id === color; })[0];
+    ColorsService.prototype.getColor = function (id) {
+        return this.getColors([id])[0];
     };
     ColorsService.ctorParameters = function () { return []; };
     return ColorsService;
@@ -4704,10 +4717,115 @@ var ColorsService = (function () {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(24);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PhoneTypesService; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return SizesService; });
 
-var PhoneTypesService = (function () {
-    function PhoneTypesService() {
+var SizesService = (function () {
+    function SizesService() {
+        this.sizes = [
+            {
+                id: __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* PhoneSize */].GB8,
+                value: 8,
+                name: "8gb",
+            }, {
+                id: __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* PhoneSize */].GB16,
+                value: 16,
+                name: "16gb",
+            }, {
+                id: __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* PhoneSize */].GB32,
+                value: 32,
+                name: "32gb",
+            }, {
+                id: __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* PhoneSize */].GB64,
+                value: 64,
+                name: "64gb",
+            }, {
+                id: __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* PhoneSize */].GB128,
+                value: 128,
+                name: "128gb",
+            }, {
+                id: __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* PhoneSize */].GB256,
+                value: 256,
+                name: "256gb",
+            }
+        ];
+    }
+    SizesService.prototype.getSizes = function (ids) {
+        return this.sizes.filter(function (_a) {
+            var id = _a.id;
+            return ids.indexOf(id) >= 0;
+        });
+    };
+    SizesService.prototype.getSize = function (id) {
+        return this.getSizes([id])[0];
+    };
+    SizesService.ctorParameters = function () { return []; };
+    return SizesService;
+}());
+
+//# sourceMappingURL=sizes.service.js.map
+
+/***/ }),
+
+/***/ 53:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(24);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return StatesService; });
+
+var StatesService = (function () {
+    function StatesService() {
+        this.states = [
+            {
+                id: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* PhoneState */].WORKING,
+                name: "Рабочий",
+                desc: [
+                    "Телефон включается",
+                    "Есть царапины или не работает часть функций",
+                ]
+            }, {
+                id: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* PhoneState */].EXCELENT,
+                name: "Отличное",
+                desc: [
+                    "Телефон работает",
+                    "Небольшие царапины",
+                ]
+            }, {
+                id: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* PhoneState */].NEW,
+                name: "Как новый",
+                desc: [
+                    "Телефон полностью исправен",
+                    "Нет царапин и потертостей",
+                ]
+            }
+        ];
+    }
+    StatesService.prototype.getStates = function (ids) {
+        return this.states.filter(function (_a) {
+            var id = _a.id;
+            return ids.indexOf(id) >= 0;
+        });
+    };
+    StatesService.prototype.getState = function (st) {
+        return this.getStates([st])[0];
+    };
+    StatesService.ctorParameters = function () { return []; };
+    return StatesService;
+}());
+
+//# sourceMappingURL=states.service.js.map
+
+/***/ }),
+
+/***/ 54:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(24);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return TypesService; });
+
+var TypesService = (function () {
+    function TypesService() {
         this.phoneTypes = [
             {
                 name: 'iPhone 4S',
@@ -4799,122 +4917,20 @@ var PhoneTypesService = (function () {
             },
         ];
     }
-    PhoneTypesService.prototype.getTypes = function () {
+    TypesService.prototype.getTypes = function () {
         return this.phoneTypes;
     };
-    PhoneTypesService.prototype.getType = function (wantedType) {
+    TypesService.prototype.getType = function (wantedType) {
         return this.phoneTypes.filter(function (_a) {
             var type = _a.type;
             return type === wantedType;
         })[0];
     };
-    PhoneTypesService.ctorParameters = function () { return []; };
-    return PhoneTypesService;
+    TypesService.ctorParameters = function () { return []; };
+    return TypesService;
 }());
 
-//# sourceMappingURL=phone-types.service.js.map
-
-/***/ }),
-
-/***/ 53:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(24);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return SizesService; });
-
-var SizesService = (function () {
-    function SizesService() {
-        this.sizes = [
-            {
-                id: __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* PhoneSize */].GB8,
-                value: 8,
-                name: "8gb",
-            }, {
-                id: __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* PhoneSize */].GB16,
-                value: 16,
-                name: "16gb",
-            }, {
-                id: __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* PhoneSize */].GB32,
-                value: 32,
-                name: "32gb",
-            }, {
-                id: __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* PhoneSize */].GB64,
-                value: 64,
-                name: "64gb",
-            }, {
-                id: __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* PhoneSize */].GB128,
-                value: 128,
-                name: "128gb",
-            }, {
-                id: __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* PhoneSize */].GB256,
-                value: 256,
-                name: "256gb",
-            }
-        ];
-    }
-    SizesService.prototype.getSizes = function () {
-        return this.sizes;
-    };
-    SizesService.prototype.getSize = function (id) {
-        return this.sizes[id];
-    };
-    SizesService.ctorParameters = function () { return []; };
-    return SizesService;
-}());
-
-//# sourceMappingURL=sizes.service.js.map
-
-/***/ }),
-
-/***/ 54:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(24);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return StatesService; });
-
-var StatesService = (function () {
-    function StatesService() {
-        this.states = [
-            {
-                id: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* PhoneState */].WORKING,
-                name: "Рабочий",
-                desc: [
-                    "Телефон включается",
-                    "Есть царапины или не работает часть функций",
-                ]
-            }, {
-                id: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* PhoneState */].EXCELENT,
-                name: "Отличное",
-                desc: [
-                    "Телефон работает",
-                    "Небольшие царапины",
-                ]
-            }, {
-                id: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* PhoneState */].NEW,
-                name: "Как новый",
-                desc: [
-                    "Телефон полностью исправен",
-                    "Нет царапин и потертостей",
-                ]
-            }
-        ];
-    }
-    StatesService.prototype.getStates = function () {
-        return this.states;
-    };
-    StatesService.prototype.getState = function (st) {
-        return this.states.filter(function (_a) {
-            var id = _a.id;
-            return id === st;
-        })[0];
-    };
-    StatesService.ctorParameters = function () { return []; };
-    return StatesService;
-}());
-
-//# sourceMappingURL=states.service.js.map
+//# sourceMappingURL=types.service.js.map
 
 /***/ })
 
