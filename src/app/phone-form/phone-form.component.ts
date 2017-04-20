@@ -1,35 +1,29 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { TypesService } from "../shared/model/type/types.service";
-import {PhoneState, PhoneType} from "../shared/constants";
+import { PhoneState, PhoneType } from "../shared/constants";
 import { ColorsService } from "../shared/model/color/colors.service";
 import { SizesService } from "../shared/model/size/sizes.service";
 import { StatesService } from "../shared/model/state/states.service";
-import { IPhone } from "../shared/model/iphone";
 import { IType } from "../shared/model/type/itype";
 import { IState } from "../shared/model/state/istate";
 import { IColor } from "../shared/model/color/icolor";
 import { ISize } from "../shared/model/size/isize";
 
 
-export interface IAvailable {
-  sizes: ISize[],
-  colors: IColor[],
-  states: IState[],
-}
-
 @Component({
   selector: 'app-phone-form',
   templateUrl: './phone-form.component.html',
   styleUrls: ['./phone-form.component.css'],
-  // changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PhoneFormComponent implements OnInit {
   phoneGroupForm: FormGroup;
   types: IType[];
-  private chosenType: IType;
-  private chosenPhone: IPhone;
-  available: IAvailable;
+  available: {
+    sizes: ISize[],
+    colors: IColor[],
+    states: IState[],
+  };
   descriptions: string[];
   constructor(
     private formBuilder: FormBuilder,
@@ -39,41 +33,35 @@ export class PhoneFormComponent implements OnInit {
     private statesService: StatesService,
   ) {
     this.types = this.typesService.getTypes();
+    this.updateType(this.types[0].type);
   }
 
   ngOnInit() {
-    this.setNewType(PhoneType.I4S);
-    this.setDescriptions(this.chosenPhone.state);
-
-    this.phoneGroupForm = this.formBuilder.group(this.chosenPhone);
+    const phone = Object.assign({}, this.getFirstAvailable(), {type: this.types[0].type});
+    this.phoneGroupForm = this.formBuilder.group(phone);
     this.phoneGroupForm.get('type').valueChanges.subscribe((type: PhoneType) => {
-      this.setNewType(type);
-      const newChosenPhone = Object.assign(this.chosenPhone);
-      delete newChosenPhone.type;
-      this.phoneGroupForm.patchValue(newChosenPhone, {onlySelf: true, emitEvent: false});
-    });
-    ['size', 'color', 'state'].forEach(key => {
-      this.phoneGroupForm.get(key).valueChanges.subscribe((data) => {
-        this.chosenPhone = Object.assign(this.chosenPhone, {[key]: data});
-      });
+      this.updateType(type);
+      this.phoneGroupForm.patchValue(this.getFirstAvailable(), {onlySelf: true, emitEvent: false});
     });
     this.phoneGroupForm.get('state').valueChanges.subscribe(
       state => this.setDescriptions(state)
     );
     this.phoneGroupForm.valueChanges.subscribe(form => console.log(form));
   }
-  private setNewType(newType: PhoneType) {
-    this.chosenType = this.typesService.getType(newType);
-    this.chosenPhone = {
-      type: this.chosenType.type,
-      size: this.chosenType.availableSizes[0],
-      color: this.chosenType.availableColors[0],
-      state: this.chosenType.availableStates[0],
-    };
+  private updateType(type: PhoneType) {
+    const chosenType = this.typesService.getType(type);
     this.available = {
-      sizes: this.sizesService.getSizes(this.chosenType.availableSizes),
-      colors: this.colorsService.getColors(this.chosenType.availableColors),
-      states: this.statesService.getStates(this.chosenType.availableStates),
+      sizes: this.sizesService.getSizes(chosenType.availableSizes),
+      colors: this.colorsService.getColors(chosenType.availableColors),
+      states: this.statesService.getStates(chosenType.availableStates),
+    };
+    this.descriptions = this.available.states[0].desc;
+  }
+  private getFirstAvailable() {
+    return {
+      size: this.available.sizes[0].id,
+      color: this.available.colors[0].id,
+      state: this.available.states[0].id,
     };
   }
   private setDescriptions(state: PhoneState) {
