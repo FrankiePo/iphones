@@ -35,17 +35,22 @@ var CallFormComponent = (function () {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_forms__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__shared_model_type_types_service__ = __webpack_require__(54);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__shared_constants__ = __webpack_require__(24);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__shared_model_color_colors_service__ = __webpack_require__(51);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__shared_model_size_sizes_service__ = __webpack_require__(52);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__shared_model_state_states_service__ = __webpack_require__(53);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__shared_model_color_colors_service__ = __webpack_require__(51);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__shared_model_size_sizes_service__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__shared_model_state_states_service__ = __webpack_require__(53);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PhoneFormComponent; });
 
 
 
 
 
-
+function getFirstAvailable(available) {
+    return {
+        size: available.sizes[0].id,
+        color: available.colors[0].id,
+        state: available.states[0].id,
+    };
+}
 var PhoneFormComponent = (function () {
     function PhoneFormComponent(formBuilder, typesService, colorsService, sizesService, statesService) {
         this.formBuilder = formBuilder;
@@ -54,45 +59,32 @@ var PhoneFormComponent = (function () {
         this.sizesService = sizesService;
         this.statesService = statesService;
         this.types = this.typesService.getTypes();
+        this.updateType(this.types[0].type);
     }
     PhoneFormComponent.prototype.ngOnInit = function () {
         var _this = this;
-        this.setNewType(__WEBPACK_IMPORTED_MODULE_2__shared_constants__["d" /* PhoneType */].I4S);
-        this.setDescriptions(this.chosenPhone.state);
-        this.phoneGroupForm = this.formBuilder.group(this.chosenPhone);
+        var phone = Object.assign({}, getFirstAvailable(this.available), { type: this.types[0].type });
+        this.phoneGroupForm = this.formBuilder.group(phone);
         this.phoneGroupForm.get('type').valueChanges.subscribe(function (type) {
-            _this.setNewType(type);
-            var newChosenPhone = Object.assign(_this.chosenPhone);
-            delete newChosenPhone.type;
-            _this.phoneGroupForm.patchValue(newChosenPhone, { onlySelf: true, emitEvent: false });
-        });
-        ['size', 'color', 'state'].forEach(function (key) {
-            _this.phoneGroupForm.get(key).valueChanges.subscribe(function (data) {
-                _this.chosenPhone = Object.assign(_this.chosenPhone, (_a = {}, _a[key] = data, _a));
-                var _a;
-            });
+            _this.updateType(type);
+            _this.phoneGroupForm.patchValue(getFirstAvailable(_this.available), { onlySelf: true, emitEvent: false });
         });
         this.phoneGroupForm.get('state').valueChanges.subscribe(function (state) { return _this.setDescriptions(state); });
         this.phoneGroupForm.valueChanges.subscribe(function (form) { return console.log(form); });
     };
-    PhoneFormComponent.prototype.setNewType = function (newType) {
-        this.chosenType = this.typesService.getType(newType);
-        this.chosenPhone = {
-            type: this.chosenType.type,
-            size: this.chosenType.availableSizes[0],
-            color: this.chosenType.availableColors[0],
-            state: this.chosenType.availableStates[0],
-        };
+    PhoneFormComponent.prototype.updateType = function (type) {
+        var chosenType = this.typesService.getType(type);
         this.available = {
-            sizes: this.sizesService.getSizes(this.chosenType.availableSizes),
-            colors: this.colorsService.getColors(this.chosenType.availableColors),
-            states: this.statesService.getStates(this.chosenType.availableStates),
+            sizes: this.sizesService.getSizes(chosenType.availableSizes),
+            colors: this.colorsService.getColors(chosenType.availableColors),
+            states: this.statesService.getStates(chosenType.availableStates),
         };
+        this.descriptions = this.available.states[0].desc;
     };
     PhoneFormComponent.prototype.setDescriptions = function (state) {
         this.descriptions = this.statesService.getState(state).desc;
     };
-    PhoneFormComponent.ctorParameters = function () { return [{ type: __WEBPACK_IMPORTED_MODULE_0__angular_forms__["b" /* FormBuilder */] }, { type: __WEBPACK_IMPORTED_MODULE_1__shared_model_type_types_service__["a" /* TypesService */] }, { type: __WEBPACK_IMPORTED_MODULE_3__shared_model_color_colors_service__["a" /* ColorsService */] }, { type: __WEBPACK_IMPORTED_MODULE_4__shared_model_size_sizes_service__["a" /* SizesService */] }, { type: __WEBPACK_IMPORTED_MODULE_5__shared_model_state_states_service__["a" /* StatesService */] }]; };
+    PhoneFormComponent.ctorParameters = function () { return [{ type: __WEBPACK_IMPORTED_MODULE_0__angular_forms__["b" /* FormBuilder */] }, { type: __WEBPACK_IMPORTED_MODULE_1__shared_model_type_types_service__["a" /* TypesService */] }, { type: __WEBPACK_IMPORTED_MODULE_2__shared_model_color_colors_service__["a" /* ColorsService */] }, { type: __WEBPACK_IMPORTED_MODULE_3__shared_model_size_sizes_service__["a" /* SizesService */] }, { type: __WEBPACK_IMPORTED_MODULE_4__shared_model_state_states_service__["a" /* StatesService */] }]; };
     return PhoneFormComponent;
 }());
 
@@ -251,21 +243,21 @@ var AppComponentNgFactory = __WEBPACK_IMPORTED_MODULE_1__angular_core__["_25" /*
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__ng_bootstrap_ng_bootstrap_modal_modal_stack__ = __webpack_require__(73);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__ng_bootstrap_ng_bootstrap_modal_modal__ = __webpack_require__(75);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__ng_bootstrap_ng_bootstrap_alert_alert_config__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__ng_bootstrap_ng_bootstrap_progressbar_progressbar_config__ = __webpack_require__(42);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__ng_bootstrap_ng_bootstrap_tooltip_tooltip_config__ = __webpack_require__(46);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__ng_bootstrap_ng_bootstrap_typeahead_typeahead_config__ = __webpack_require__(48);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__ng_bootstrap_ng_bootstrap_accordion_accordion_config__ = __webpack_require__(31);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__ng_bootstrap_ng_bootstrap_carousel_carousel_config__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__ng_bootstrap_ng_bootstrap_progressbar_progressbar_config__ = __webpack_require__(41);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__ng_bootstrap_ng_bootstrap_tooltip_tooltip_config__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__ng_bootstrap_ng_bootstrap_typeahead_typeahead_config__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__ng_bootstrap_ng_bootstrap_accordion_accordion_config__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__ng_bootstrap_ng_bootstrap_carousel_carousel_config__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__ng_bootstrap_ng_bootstrap_datepicker_ngb_calendar__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__ng_bootstrap_ng_bootstrap_datepicker_datepicker_i18n__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__ng_bootstrap_ng_bootstrap_datepicker_ngb_date_parser_formatter__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__ng_bootstrap_ng_bootstrap_datepicker_ngb_date_parser_formatter__ = __webpack_require__(37);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_33__ng_bootstrap_ng_bootstrap_datepicker_datepicker_config__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_34__ng_bootstrap_ng_bootstrap_dropdown_dropdown_config__ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_35__ng_bootstrap_ng_bootstrap_pagination_pagination_config__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_36__ng_bootstrap_ng_bootstrap_popover_popover_config__ = __webpack_require__(41);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_37__ng_bootstrap_ng_bootstrap_rating_rating_config__ = __webpack_require__(43);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_38__ng_bootstrap_ng_bootstrap_tabset_tabset_config__ = __webpack_require__(44);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_39__ng_bootstrap_ng_bootstrap_timepicker_timepicker_config__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_34__ng_bootstrap_ng_bootstrap_dropdown_dropdown_config__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_35__ng_bootstrap_ng_bootstrap_pagination_pagination_config__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_36__ng_bootstrap_ng_bootstrap_popover_popover_config__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_37__ng_bootstrap_ng_bootstrap_rating_rating_config__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_38__ng_bootstrap_ng_bootstrap_tabset_tabset_config__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_39__ng_bootstrap_ng_bootstrap_timepicker_timepicker_config__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_40__app_shared_model_type_types_service__ = __webpack_require__(54);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_41__app_shared_model_color_colors_service__ = __webpack_require__(51);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_42__app_shared_model_size_sizes_service__ = __webpack_require__(52);
@@ -2675,7 +2667,7 @@ var NgbAlertNgFactory = __WEBPACK_IMPORTED_MODULE_0__angular_core__["_25" /* ɵc
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ng_bootstrap_ng_bootstrap_datepicker_datepicker_day_view__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ng_bootstrap_ng_bootstrap_datepicker_datepicker_day_view__ = __webpack_require__(32);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return RenderType_NgbDatepickerDayView; });
 /* harmony export (immutable) */ __webpack_exports__["a"] = View_NgbDatepickerDayView_0;
 /* unused harmony export NgbDatepickerDayViewNgFactory */
@@ -2763,7 +2755,7 @@ var NgbDatepickerDayViewNgFactory = __WEBPACK_IMPORTED_MODULE_0__angular_core__[
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_common__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ng_bootstrap_ng_bootstrap_datepicker_datepicker_month_view__ = __webpack_require__(34);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ng_bootstrap_ng_bootstrap_datepicker_datepicker_month_view__ = __webpack_require__(33);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ng_bootstrap_ng_bootstrap_datepicker_datepicker_i18n__ = __webpack_require__(8);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return RenderType_NgbDatepickerMonthView; });
 /* harmony export (immutable) */ __webpack_exports__["a"] = View_NgbDatepickerMonthView_0;
@@ -3067,7 +3059,7 @@ var NgbDatepickerMonthViewNgFactory = __WEBPACK_IMPORTED_MODULE_0__angular_core_
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_forms__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ng_bootstrap_ng_bootstrap_datepicker_datepicker_navigation_select__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ng_bootstrap_ng_bootstrap_datepicker_datepicker_navigation_select__ = __webpack_require__(34);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__angular_common__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ng_bootstrap_ng_bootstrap_datepicker_datepicker_i18n__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ng_bootstrap_ng_bootstrap_datepicker_ngb_calendar__ = __webpack_require__(7);
@@ -3301,10 +3293,10 @@ var NgbDatepickerNavigationSelectNgFactory = __WEBPACK_IMPORTED_MODULE_0__angula
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__datepicker_navigation_select_ngfactory__ = __webpack_require__(164);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ng_bootstrap_ng_bootstrap_datepicker_datepicker_navigation_select__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ng_bootstrap_ng_bootstrap_datepicker_datepicker_navigation_select__ = __webpack_require__(34);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ng_bootstrap_ng_bootstrap_datepicker_datepicker_i18n__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ng_bootstrap_ng_bootstrap_datepicker_ngb_calendar__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ng_bootstrap_ng_bootstrap_datepicker_datepicker_navigation__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ng_bootstrap_ng_bootstrap_datepicker_datepicker_navigation__ = __webpack_require__(35);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__angular_common__ = __webpack_require__(2);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return RenderType_NgbDatepickerNavigation; });
 /* harmony export (immutable) */ __webpack_exports__["a"] = View_NgbDatepickerNavigation_0;
@@ -3526,15 +3518,15 @@ var NgbDatepickerNavigationNgFactory = __WEBPACK_IMPORTED_MODULE_0__angular_core
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__datepicker_day_view_ngfactory__ = __webpack_require__(162);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ng_bootstrap_ng_bootstrap_datepicker_datepicker_day_view__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ng_bootstrap_ng_bootstrap_datepicker_datepicker_day_view__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__datepicker_navigation_ngfactory__ = __webpack_require__(165);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ng_bootstrap_ng_bootstrap_datepicker_datepicker_navigation__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ng_bootstrap_ng_bootstrap_datepicker_datepicker_navigation__ = __webpack_require__(35);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ng_bootstrap_ng_bootstrap_datepicker_datepicker_i18n__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__ng_bootstrap_ng_bootstrap_datepicker_ngb_calendar__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__angular_common__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__datepicker_month_view_ngfactory__ = __webpack_require__(163);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__ng_bootstrap_ng_bootstrap_datepicker_datepicker_month_view__ = __webpack_require__(34);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__ng_bootstrap_ng_bootstrap_datepicker_datepicker__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__ng_bootstrap_ng_bootstrap_datepicker_datepicker_month_view__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__ng_bootstrap_ng_bootstrap_datepicker_datepicker__ = __webpack_require__(36);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__ng_bootstrap_ng_bootstrap_datepicker_datepicker_service__ = __webpack_require__(69);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__ng_bootstrap_ng_bootstrap_datepicker_datepicker_config__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__angular_forms__ = __webpack_require__(4);
@@ -4243,7 +4235,7 @@ var NgbTooltipWindowNgFactory = __WEBPACK_IMPORTED_MODULE_0__angular_core__["_25
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_common__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ng_bootstrap_ng_bootstrap_typeahead_highlight__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ng_bootstrap_ng_bootstrap_typeahead_highlight__ = __webpack_require__(46);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return RenderType_NgbHighlight; });
 /* harmony export (immutable) */ __webpack_exports__["a"] = View_NgbHighlight_0;
 /* unused harmony export NgbHighlightNgFactory */
@@ -4359,9 +4351,9 @@ var NgbHighlightNgFactory = __WEBPACK_IMPORTED_MODULE_0__angular_core__["_25" /*
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__highlight_ngfactory__ = __webpack_require__(171);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ng_bootstrap_ng_bootstrap_typeahead_highlight__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ng_bootstrap_ng_bootstrap_typeahead_highlight__ = __webpack_require__(46);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__angular_common__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ng_bootstrap_ng_bootstrap_typeahead_typeahead_window__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ng_bootstrap_ng_bootstrap_typeahead_typeahead_window__ = __webpack_require__(48);
 /* unused harmony export RenderType_NgbTypeaheadWindow */
 /* unused harmony export View_NgbTypeaheadWindow_0 */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return NgbTypeaheadWindowNgFactory; });
@@ -4605,7 +4597,15 @@ var environment = {
 
 /***/ }),
 
-/***/ 24:
+/***/ 262:
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(147);
+
+
+/***/ }),
+
+/***/ 50:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4654,19 +4654,11 @@ var PhoneState;
 
 /***/ }),
 
-/***/ 262:
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(147);
-
-
-/***/ }),
-
 /***/ 51:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(50);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ColorsService; });
 
 var ColorsService = (function () {
@@ -4716,7 +4708,7 @@ var ColorsService = (function () {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(50);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return SizesService; });
 
 var SizesService = (function () {
@@ -4770,7 +4762,7 @@ var SizesService = (function () {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(50);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return StatesService; });
 
 var StatesService = (function () {
@@ -4821,7 +4813,7 @@ var StatesService = (function () {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(50);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return TypesService; });
 
 var TypesService = (function () {
