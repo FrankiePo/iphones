@@ -30,10 +30,10 @@ export class ColorsService {
       }
     ];
   }
-  getColors(): IColor[] {
-    return this.colors;
+  getColors(ids: PhoneColor[]): IColor[] {
+    return this.colors.filter(({ id }) => ids.indexOf(id) >= 0);
   }
-  getColor(color: PhoneColor): IColor {
-    return this.colors.filter(item => item.id === color)[0];
+  getColor(id: PhoneColor): IColor {
+    return this.getColors([id])[0];
   }
 }
