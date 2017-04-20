@@ -31,8 +31,8 @@ export class StatesService {
       }
     ]
   }
-  getStates(stArr: PhoneState[]): IState[] {
-    return this.states.filter(({ id }) => stArr.indexOf(id) >= 0);
+  getStates(ids: PhoneState[]): IState[] {
+    return this.states.filter(({ id }) => ids.indexOf(id) >= 0);
   }
   getState(st: PhoneState): IState {
     return this.getStates([st])[0];
