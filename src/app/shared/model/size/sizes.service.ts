@@ -34,11 +34,10 @@ export class SizesService {
       }
     ];
   }
-  getSizes(): ISize[] {
-    return this.sizes;
+  getSizes(ids: PhoneSize[]): ISize[] {
+    return this.sizes.filter(({ id }) => ids.indexOf(id) >= 0);
   }
   getSize(id: PhoneSize): ISize {
-    return this.sizes[id];
+    return this.getSizes([id])[0];
   }
-
 }
